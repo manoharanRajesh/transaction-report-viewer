@@ -4,6 +4,11 @@
 
 [Documents](./documentation/index.html)
 
+
+## Sample Input:
+
+[sample Input](./issues.csv)
+
 To update document  or generation `npm run compodoc`
 
 ## Development server
