@@ -1,0 +1,44 @@
+<div class="jumbotron">
+  <h1>Issues Overview - CSV file reader</h1>
+</div>
+<div class="container">
+  <div class="row">
+    <div class="card">
+      <input id="fileHandler" type="file" accept=".csv" (change)="handleFileSelect($event)">
+    </div>
+  </div>
+  <div class="alert alert-warning" role="alert" *ngIf="showError">
+    {{errorMessage}}
+  </div>
+  <div class="row"></div>
+  <div *ngIf="issues && issues.length>0">
+    <div class="row">
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="basic-addon1">Filter by issue count:</span>
+        </div>
+        <input type="text" class="form-control" placeholder="0" aria-label="filterIssueCount"
+               [(ngModel)]="filterIssueCount" id="filterIssueCount" aria-describedby="basic-addon1">
+      </div>
+    </div>
+
+    <div class="row">
+      <table id="issueList" class="table table-hover align-san">
+        <thead *ngIf="issues && issues.length>0">
+        <td>First Name</td>
+        <td>Last Name</td>
+        <td>Issue Count</td>
+        <td>Date of Birth</td>
+        </thead>
+        <tbody class="tbody">
+        <tr *ngFor="let issue of issues | issueFilter : filterIssueCount ">
+          <td>{{issue.firstName}}</td>
+          <td>{{issue.lastName}}</td>
+          <td>{{issue.issueCount}}</td>
+          <td>{{issue.dateOfBirth}}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
