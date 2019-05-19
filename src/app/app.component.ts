@@ -13,7 +13,7 @@ export class AppComponent {
   constructor(private papa: Papa) {
   }
   filterIssueCount = 0;
-  errorMessage = 'Expected only CSV file.';
+  errorMessage = 'Expected only CSV file only.';
   showError = false;
 
   issues: IssueDetails[] = [];
@@ -25,6 +25,7 @@ export class AppComponent {
       this.showError = false;
       this.issues =  this.readIssueDetails(file);
     } else {
+      this.errorMessage = 'Expected only CSV file or error occurred while reading.';
       this.showError = true;
     }
 
@@ -43,26 +44,47 @@ export class AppComponent {
   const issues: IssueDetails[] = [];
   const reader = new FileReader();
   reader.readAsText(file);
-  reader.onload = (event: any) => {
-      const csv = event.target.result; // Content of CSV file
-      this.papa.parse(csv, {
-        skipEmptyLines: true,
-        header: false,
-        dynamicTyping: true,
-        complete: (results) => {
-          if (results && results.data) {
-            for (const rowId in results.data) {
-              if (rowId !== '0') {
-                const col: any[] = results.data[rowId];
-                if (col && col.length === 4) {
-                  issues.push(new IssueDetails(col[0], col[1], Number(col[2]), col[3]));
-                }
-              }
-            }
-          }
-        }
-      });
+  reader.onload = () => {
+    const csvData = reader.result;
+    const csvRows = (csvData as string).split(/\r\n|\n/);
+    const headerCol: string[] = this.getHeader(csvRows);
+    if (headerCol && headerCol.length === 4) {
+      this.showError = true;
+      this.errorMessage = 'Invalid number of columns';
+    } else {
+      this.showError = false;
+    }
+    this.issues = this.parseIssuesDetailsFromCSVFile(csvRows, 1);
     };
   return issues;
   }
+
+
+  getHeader(csvRecordsArr: any): string[] {
+    const headerRow = (csvRecordsArr[0] as string).split(',');
+    const headerColumns: string[] = [];
+    headerRow.forEach(c => {headerColumns.push(c); });
+    return headerColumns;
+  }
+
+  /**
+   * Parse the rows to IssueDetails and skip the header.
+   * @param csvRows csvData
+   * @param headerRow - default 0 no header
+   * @param headerLength - number of columns expected , default 4.
+   */
+  parseIssuesDetailsFromCSVFile(csvRows: any[], headerRow: number = 0 , headerLength: number = 4): IssueDetails[] {
+    const issues: IssueDetails[] = [];
+
+    for (let i = headerRow; i < csvRows.length; i++) {
+      const data = (csvRows[i] as string).split(',');
+      if (data.length === headerLength) {
+        issues.push(new IssueDetails(data[0], data[1], Number(data[2]), data[3]));
+      }
+    }
+
+    return issues;
+  }
+
+
 }
